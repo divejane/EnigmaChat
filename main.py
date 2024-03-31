@@ -1,16 +1,26 @@
-import gi
+import tkinter as tk
 
-# We must specify the GTK Version to use.
-gi.require_version("Gtk", "3.0")
 
-# importing the Gtk module from gi. LSP doesn't like this for some reason
-from gi.repository import Gtk
+class Gui:
 
-# Here we declare a window, and we connect it to the buttons to close out of it
-# We also show the window with show_all
-win = Gtk.Window(title="Discreet Dial")
-win.connect("destroy", Gtk.main_quit)
-win.show_all()
+    def __init__(self) -> None:
+        self.window = tk.Tk()
 
-# Main loop, similar to tkinter mainloop()
-Gtk.main()
+        self.window.geometry(
+            f"{int(self.window.winfo_screenwidth()/1.5)}x{int(self.window.winfo_screenheight()/1.5)}"
+        )
+
+        self.window.config(bg="#222222")
+
+        self.window.title("Discreet Dial")
+
+        self.entry = tk.Text(self.window, bg="#222222", fg="#FFFFFF", width=int(self.window.winfo_screenwidth()/1.5), font=("Courier", 30), height=5)
+        self.entry.pack(side="bottom")
+
+    def loop(self) -> None:
+        self.window.mainloop()
+
+
+root = Gui()
+
+root.loop()
