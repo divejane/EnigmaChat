@@ -1,8 +1,11 @@
 # TODO: remove all db lines, including the fake hostlist in the server
+# TODO: fix the daemon thread not being ended, which bugs out the address and keeps it in use
+# TODO: fix incoming messages not being displayed correctly
 
 import os
 import pickle
 import socket
+import threading
 
 HOST = "3.15.139.172"
 PORT = 9236
@@ -102,8 +105,9 @@ def roomjoin_load(jgen_s, rqst_room, hlist):
     print("sent host connection info...")
     print(hlist[rqst_room][0], PORT)
     js = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    js.connect(("localhost", PORT))
+    js.connect(("127.0.0.1", PORT)) # need 127.0.0.1 to be a variable
     print("\nconnection successful, please wait...")
+    chatroom(js, "127.0.0.1")
 
 
 def roomhost_load():
@@ -113,13 +117,33 @@ def roomhost_load():
     )
     print("\n\nroom configured, awaiting peer establishment...")
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", PORT))
+    s.bind(("127.0.0.1", PORT))
     s.listen()
     conn, addr = s.accept()
     print("\nconnection successful, please wait...")
+    chatroom(conn, addr[0])
 
+def conn_read(pt_conn, pt_addr):
+    while True:
+        inc_m = pt_conn.recv(1024)
+        if (inc_m == 0): continue
+        print("\u001B[s", end="")     # Save current cursor position
+        print("\u001B[A", end="")     # Move cursor up one line
+        print("\u001B[L", end="")     # Insert new line
+        print(f'\n{pt_addr}: {inc_m.decode()}')
+        print("\u001B[u", end="")     # Jump back to saved cursor position
 
-# async def chatroom():
+def chatroom(pt_conn, pt_addr):
+    cls()
+    print(
+        "           _                \n ___ ___  (_)__ ___ _  ___ _\n/ -_) _ \/ / _ `/  ' \/ _ `/\n\__/_//_/_/\_, /_/_/_/\_,_/ \n          /___/             \n\n"
+    )
+    print(f'connected to {pt_addr}')
+    conn_read_thr = threading.Thread(target=conn_read, args=(pt_conn, pt_addr), daemon=True)
+    conn_read_thr.start()
+    while True: # This needs end conditions eventually, until then, kb_interupt to end chatting
+        usinp = input("enter messsage: ")
+        pt_conn.sendall(usinp.encode())
 
 
 # Homepage
