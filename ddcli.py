@@ -2,6 +2,7 @@
 # TODO: daemon & address reservation end appropriately , but chatroom() input now hangs when the main() function is called
 # TODO: fix incoming messages not being displayed correctly **
 # TODO: comment this stuff i know its bad im sorry ill work on it im sorry please dont kill me
+
 import os
 import pickle
 import socket
