@@ -1,7 +1,7 @@
 # TODO: remove all db lines, including the fake hostlist in the server
-# TODO: fix the daemon thread not being ended, which bugs out the address and keeps it in use
-# TODO: fix incoming messages not being displayed correctly
-
+# TODO: daemon & address reservation end appropriately , but chatroom() input now hangs when the main() function is called
+# TODO: fix incoming messages not being displayed correctly **
+# TODO: comment this stuff i know its bad im sorry ill work on it im sorry please dont kill me
 import os
 import pickle
 import socket
@@ -126,12 +126,15 @@ def roomhost_load():
 def conn_read(pt_conn, pt_addr):
     while True:
         inc_m = pt_conn.recv(1024)
-        if (inc_m == 0): continue
+        if (inc_m == b''): break
         print("\u001B[s", end="")     # Save current cursor position
         print("\u001B[A", end="")     # Move cursor up one line
         print("\u001B[L", end="")     # Insert new line
         print(f'\n{pt_addr}: {inc_m.decode()}')
         print("\u001B[u", end="")     # Jump back to saved cursor position
+    # temp error message for when socket end
+    pt_conn.close()
+    main()    
 
 def chatroom(pt_conn, pt_addr):
     cls()
