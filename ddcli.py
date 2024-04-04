@@ -15,8 +15,7 @@ cls = lambda: os.system("cls" if os.name == "nt" else "clear") # screen clear la
 
 def drawLogo(): # prints 'dial' ascii to terminal 
     print('\x1b[1;31m' +
-        "\n ██▄   ▄█ ██   █\n █  █  ██ █ █  █ \n █   █ ██ █▄▄█ █ \n █  █  ▐█ █  █ ███▄\n ███▀   ▐    █     ▀\n            █\n            █                  \n\n" + '\033[0m'
-        
+        "     ___                     __       ___      __\n ___/ (_)__ ___________ ___ / /_  ___/ (_)__ _/ /\n/ _  / (_-</ __/ __/ -_) -_) __/ / _  / / _ `/ /\n \_,_/_/___/\__/_/  \__/\__/\__/  \_,_/_/\_,_/_/\n\n " + '\033[0m'
     )
 
 # value within range check
