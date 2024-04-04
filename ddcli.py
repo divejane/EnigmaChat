@@ -1,5 +1,4 @@
 # TODO: remove all db lines, including the fake hostlist in the server
-# TODO: fix incoming messages not being displayed correctly **
 # TODO: comment this stuff i know its bad im sorry ill work on it im sorry please dont kill me
 
 import os
