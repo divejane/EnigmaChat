@@ -148,12 +148,17 @@ def chatroom(pt_conn, pt_addr):
         print(f'you: {usinp}')
         print("\u001B[L", end="")     # Insert new line
         print("\u001B[999C", end="")  # Move cursor to beginning of line
+        if (usinp == '/exit'): 
+            try: 
+                pt_conn.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            pt_conn.close()
+            main()
         try: 
             pt_conn.sendall(usinp.encode())        
         except:
-            if (usinp == '/exit'): 
-                main()
-                pt_conn.close()
+            pass
 
 # Homepage
 def main():
