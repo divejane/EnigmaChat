@@ -125,36 +125,35 @@ def conn_read(pt_conn, pt_addr):
     while True:
         inc_m = pt_conn.recv(1024)
         print('\u001B[2K', end='')    # Erase line 
-        print("\u001B7", end="")      # Save current cursor position
-        print("\u001B[A", end="")     # Move cursor up one line
-        print("\u001B[999D", end="")  # Move cursor to beginning of line
-        print("\u001B[S", end="")     # Scroll up/pan window down 1 line
-        print("\u001B[L", end="")     # Insert new line
+        print("\u001B[F", end='')     # Move cursor up one line
         if (inc_m == b''): 
-            print("connection ended, type '/exit' to leave")
-            print('enter message: ')
-            # print('\u001B8', end='')
+            print("\n\u001B[5mconnection ended, type '/exit' to leave\u001B[0m")
+            print("\u001B[999D", end="")  # Move cursor to beginning of line
+            print('\nenter message: ', end='')
             pt_conn.close()
             break
         print(f'\n{pt_addr}: {inc_m.decode()}')
-        print('enter message: ')
-        print('\u001B8', end='')
+        print("\u001B[999D", end="")  # Move cursor to beginning of line
+        print('\nenter message: ', end='')
 
 def chatroom(pt_conn, pt_addr): 
     cls()
     drawLogo()
-    print(f'connected to {pt_addr}')
+    print(f"connected to {pt_addr}, type '/exit' to leave")
     conn_read_thr = threading.Thread(target=conn_read, args=(pt_conn, pt_addr), daemon=True)
     conn_read_thr.start()
     while True: # This needs end conditions eventually, until then, kb_interupt to end chatting
-        print("\u001B7", end="")      # Save current cursor position
-        usinp = input("enter messsage: ")
-        #print(f'you: {usinp}')
-        if (usinp == '/exit'): 
-            main()
-        pt_conn.sendall(usinp.encode())
-        print('\u001B8', end='')
-
+        usinp = input("\nenter message: ")
+        print("\u001B[A", end="")     # Move cursor up one line
+        print('\u001B[2K', end='')    # Erase line 
+        print(f'you: {usinp}')
+        print("\u001B[L", end="")     # Insert new line
+        print("\u001B[999C", end="")  # Move cursor to beginning of line
+        try: 
+            pt_conn.sendall(usinp.encode())        
+        except:
+            if (usinp == '/exit'): 
+                main()
 
 # Homepage
 def main():
