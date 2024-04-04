@@ -153,6 +153,7 @@ def chatroom(pt_conn, pt_addr):
         except:
             if (usinp == '/exit'): 
                 main()
+                pt_conn.close()
 
 # Homepage
 def main():
