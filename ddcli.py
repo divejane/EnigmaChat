@@ -1,5 +1,4 @@
-# TODO: remove all db lines, including the fake hostlist in the server
-# TODO: comment this stuff i know its bad im sorry ill work on it im sorry please dont kill me
+# TODO: Need to hand off the 'main' socket on the server to a dynamically generated socket so that extended-life connections between the server and the client do not get replaced by new connections
 
 import os
 import pickle
@@ -15,7 +14,7 @@ cls = lambda: os.system("cls" if os.name == "nt" else "clear") # screen clear la
 
 def drawLogo(): # prints 'dial' ascii to terminal 
     print('\x1b[1;31m' +
-        "     ___                     __       ___      __\n ___/ (_)__ ___________ ___ / /_  ___/ (_)__ _/ /\n/ _  / (_-</ __/ __/ -_) -_) __/ / _  / / _ `/ /\n \_,_/_/___/\__/_/  \__/\__/\__/  \_,_/_/\_,_/_/\n\n " + '\033[0m'
+        "\n    ___                     __       ___      __\n ___/ (_)__ ___________ ___ / /_  ___/ (_)__ _/ /\n/ _  / (_-</ __/ __/ -_) -_) __/ / _  / / _ `/ /\n \_,_/_/___/\__/_/  \__/\__/\__/  \_,_/_/\_,_/_/\n\n " + '\033[0m'
     )
 
 # value within range check
@@ -39,6 +38,7 @@ def roomlist_load():  # list room names
     roomrequest_s.connect((HOST, PORT))
     roomrequest_s.sendall(b"roomrequest")
     open_hosts = pickle.loads(roomrequest_s.recv(1024)) # unpickles hostlist sent by server from roomrequest
+    roomrequest_s.close()
 
     # print room names w/ formatting
     print("|     room name     |\n") 
@@ -54,7 +54,7 @@ def roomlist_load():  # list room names
 
     # send request to server to delete room information
     else:
-        roomjoin_load(roomrequest_s, usinp, open_hosts) # starts loading screen
+        roomjoin_load(usinp, open_hosts) # starts loading screen
 
 
 # room creation
@@ -70,13 +70,12 @@ def room_gen():
             print('\nattempting to connect to server...')
             hostgen_s.connect((HOST, PORT))
             hostgen_s.sendall(host_info)
-            hostgen_s.close()
             break
 
         print("room name and/or password must be between 0 and 16 characters\n")
     # print(f"\nverify room information: \nroom name: {roomname}\nroom password: {password}") # +wait
     print("room configured")
-    roomhost_load()
+    roomhost_load(hostgen_s)
 
 
 # settings menu
@@ -95,10 +94,8 @@ def settings():
 
 
 # loading screens for client and host
-def roomjoin_load(jgen_s, rqst_room, hlist):
+def roomjoin_load(rqst_room, hlist):
     cls()
-    jgen_s.sendall(f"rmrequest{rqst_room}".encode()) # sends goodbye message with room deletion request
-    jgen_s.close()
     drawLogo()
     print("sent host connection info...")
     print(hlist[rqst_room][0], PORT) # prints peer ip and listening port
@@ -108,7 +105,7 @@ def roomjoin_load(jgen_s, rqst_room, hlist):
     chatroom(js, "127.0.0.1")
 
 
-def roomhost_load():
+def roomhost_load(pt_hsock):
     cls()
     drawLogo()
     print("\n\nroom configured, awaiting peer establishment...")
@@ -117,10 +114,12 @@ def roomhost_load():
     s.listen()
     conn, addr = s.accept()
     print("\nconnection successful, please wait...")
+    pt_hsock.sendall(b"rmrequest") # host confirms found peer
+    pt_hsock.close()
     chatroom(conn, addr[0])
 
 def conn_read(pt_conn, pt_addr):
-    # this looks somehwat jank to the naked eye, but the basic premise is that the program wipes the 'enter message:' input line, then
+    # this looks jank to the unequipped, but the basic premise is that the program wipes the 'enter message:' input line, then
     # prints the recv message, then reprints the phrase 'enter message', without using input. This is because the console is still 
     # waiting for user input at a certain point in the terminal, so all we have to do is shift the terminal down by 1, which shifts the 
     # point waiting for user input. From there, we can print the recv message, then move the pointer back down to the point listening for 
@@ -154,6 +153,7 @@ def chatroom(pt_conn, pt_addr):
         print("\u001B[L", end="")     # insert new line
         print("\u001B[999C", end="")  # move cursor to beginning of line
         if (usinp == '/exit'): 
+            # may need to be changed due to efficiency issues
             try: 
                 pt_conn.shutdown(socket.SHUT_RDWR) # when /exit is called, the socket is force closed and then deallocated. Shutdown is in a try: because the client will throw an error if it tries to shutdown a socket that's already been shutdown.
             except OSError:
