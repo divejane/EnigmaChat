@@ -1,18 +1,14 @@
 # DiscreetDial
 
-DiDi, but in the terminal! Revolutionary. Doesn't get much better than this. There's really not a whole lot else to be excited for, people!
+DiDi, but with a GUI! Revolutionary. Doesn't get much better than this. There's really not a whole lot else to be excited for, people!
 
-## TODO (security, efficiency, etc.) 
+## TODO (string formatting, logic, etc.) 
 
-### Client/Server tramsmisssion protocol switch to HTTP
-Currently running the client/server protocol on TCP just because that's what we have the P2P protocol running on. Eventually going to switch client/server to HTTP because we have just about everything there based on a query/recieve structure.
+### Slash Commands
+Because DiDi has a strict keyboard only philosophy for some reason, we need to implement commands that can be invoked with "/". This will ensure that our app has all the functionality we want it to
 
-### Message order verification 
-This one is simple; We're just going to tack on a (time sent) section on a message packet after it's sent from the sender's client. From there, the recieving client(s) can determine the order of the messages based off of who sent what first.
+### Binding enter to event
+We need to bind "enter" to an event that not only sends the text from the input to the output, but also to the appropriate function depending on whether the user is connected to a server or not. We also need to write said functions, though this shouldn't be too bad since divejane has done that work in the cli
 
-### Create the walls around our doorways
-Right now, there's not a lot of error-checking on the server-side code. This makes our one (1) singular server prone to not only crashing, but potentially leaking senstivive information to some dork that wants to access it for whatever reason (federal agents). At some point, we'll secure any potentially sensitive data by error-checking a little harder, but also building a more strict framework that'll refuse interaction with any abnormal connections, avoiding a potential crash or data leak.  
-
-## Minor changes:
-- Change open-room-close requests to only be obeyed if the host of the room confirms itself as having connected to a peer
-- Server only sends connection information to join-clients if that client explicitly requests the information of that room. Small change, and honestly won't change a whole lot, but at least somewhat avoids sending a massive list full of a connection information to a (potentially malicious) client
+### Output text
+We need to figure out how to make messages and just general output from DiDi to look good with just one text box because I'm too stubborn to make another one
