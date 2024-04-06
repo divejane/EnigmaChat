@@ -1,5 +1,3 @@
-# TODO: Need to hand off the 'main' socket on the server to a dynamically generated socket so that extended-life connections between the server and the client do not get replaced by new connections
-
 import os
 import pickle
 import socket
@@ -14,7 +12,7 @@ cls = lambda: os.system("cls" if os.name == "nt" else "clear") # screen clear la
 
 def drawLogo(): # prints 'dial' ascii to terminal 
     print('\x1b[1;31m' +
-        "\n    ___                     __       ___      __\n ___/ (_)__ ___________ ___ / /_  ___/ (_)__ _/ /\n/ _  / (_-</ __/ __/ -_) -_) __/ / _  / / _ `/ /\n \_,_/_/___/\__/_/  \__/\__/\__/  \_,_/_/\_,_/_/\n\n " + '\033[0m'
+        "\n      ___                     __       ___      __\n  ___/ (_)__ ___________ ___ / /_  ___/ (_)__ _/ /\n / _  / (_-</ __/ __/ -_) -_) __/ / _  / / _ `/ /\n \_,_/_/___/\__/_/  \__/\__/\__/  \_,_/_/\_,_/_/\n\n " + '\033[0m'
     )
 
 # value within range check
@@ -54,7 +52,7 @@ def roomlist_load():  # list room names
 
     # send request to server to delete room information
     else:
-        roomjoin_load(usinp, open_hosts) # starts loading screen
+        roomjoin_load(usinp, open_hosts[usinp][4]) # starts loading screen
 
 
 # room creation
@@ -65,17 +63,17 @@ def room_gen():
         roomname = input("enter room name: ")
         password = input("enter room password: ")
         if 0 < len(roomname) < 16 and 0 < len(password) < 16:
-            host_info = pickle.dumps([roomname, password])
+            host_info = pickle.dumps([roomname, password, username])
             hostgen_s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             print('\nattempting to connect to server...')
             hostgen_s.connect((HOST, PORT))
             hostgen_s.sendall(host_info)
+            hostgen_s.close()
             break
 
         print("room name and/or password must be between 0 and 16 characters\n")
-    # print(f"\nverify room information: \nroom name: {roomname}\nroom password: {password}") # +wait
     print("room configured")
-    roomhost_load(hostgen_s)
+    roomhost_load()
 
 
 # settings menu
@@ -98,14 +96,14 @@ def roomjoin_load(rqst_room, hlist):
     cls()
     drawLogo()
     print("sent host connection info...")
-    print(hlist[rqst_room][0], PORT) # prints peer ip and listening port
     js = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     js.connect(("127.0.0.1", PORT)) # need 127.0.0.1 to be a variable
+    js.sendall(username.encode())
     print("\nconnection successful, please wait...")
-    chatroom(js, "127.0.0.1")
+    chatroom(js, hlist) 
 
 
-def roomhost_load(pt_hsock):
+def roomhost_load():
     cls()
     drawLogo()
     print("\n\nroom configured, awaiting peer establishment...")
@@ -113,12 +111,16 @@ def roomhost_load(pt_hsock):
     s.bind(("127.0.0.1", PORT))
     s.listen()
     conn, addr = s.accept()
-    print("\nconnection successful, please wait...")
-    pt_hsock.sendall(b"rmrequest") # host confirms found peer
-    pt_hsock.close()
-    chatroom(conn, addr[0])
+    print("\npeer connection successful, waiting for further info...")
+    rm_hsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    rm_hsock.connect((HOST, PORT))
+    rm_hsock.sendall(b"rmrequest") # host confirms found peer
+    rm_hsock.close()
+    peer_un = conn.recv(1024).decode()
+    print("peer connection success! please wait...")
+    chatroom(conn, peer_un)
 
-def conn_read(pt_conn, pt_addr):
+def conn_read(pt_conn, peer_un):
     # this looks jank to the unequipped, but the basic premise is that the program wipes the 'enter message:' input line, then
     # prints the recv message, then reprints the phrase 'enter message', without using input. This is because the console is still 
     # waiting for user input at a certain point in the terminal, so all we have to do is shift the terminal down by 1, which shifts the 
@@ -134,15 +136,15 @@ def conn_read(pt_conn, pt_addr):
             print('\nenter message: ', end='') 
             pt_conn.close()
             break
-        print(f'\n{pt_addr}: {inc_m.decode()}')
+        print(f'\n{peer_un}: {inc_m.decode()}')
         print("\u001B[999D", end="")  # move cursor to beginning of line
         print('\nenter message: ', end='')
 
-def chatroom(pt_conn, pt_addr): 
+def chatroom(pt_conn, peer_un): 
     cls()
     drawLogo()
-    print(f"connected to {pt_addr}, type '/exit' to leave")
-    conn_read_thr = threading.Thread(target=conn_read, args=(pt_conn, pt_addr), daemon=True) # daemon because god knows this thing is going to crash
+    print(f"connected to {peer_un}, type '/exit' to leave")
+    conn_read_thr = threading.Thread(target=conn_read, args=(pt_conn, peer_un), daemon=True) # daemon because god knows this thing is going to crash
     conn_read_thr.start()
     # same concept as conn_read(), just shifting stuff around to be able to print above input then jumping back down to the the point waiting for input 
     while True: # This needs end conditions eventually, until then, kb_interupt to end chatting
