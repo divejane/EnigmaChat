@@ -134,30 +134,7 @@ def room_host_load(host_sock: object, room_id: str) -> None:
     print("\npeer connection successful, awaiting further info...")
     peer_username = conn.recv(1024).decode()
     print("peer connection success! please wait...")
-    chatroom(conn, peer_username)
 
-
-# def conn_read(peer_connection: object, peer_username: str) -> None:
-#     """handles new incoming messages, the codes that keep appearing in the print statements are known as 'ANSI' escape codes, used for
-#     terminal control"""
-#     # transforms interface if client recieves a message. Client clears 'enter message'input line, prints incoming message, then prints new 'enter message' text one line below
-#     while True:
-#         inc_m = peer_connection.recv(1024)
-#         print('\u001B[2K', end='')    # erase line
-#         # move cursor up one line and move to beginning
-#         print("\u001B[F", end='')
-#         if (inc_m == b''):  # if recv returns nothing in bytes, the connection has been closed
-#             # allows the user to review their message history before leaving
-#             print(
-#                 "\n\u001B[5mconnection ended, type '/exit' to leave\u001B[0m")
-#             # move cursor to beginning of line (might break)
-#             print("\u001B[999D", end="")
-#             print('\nenter message: ', end='')
-#             peer_connection.close()
-#             break
-#         print(f'\n{peer_username}: {inc_m.decode()}')
-#         print("\u001B[999D", end="")  # move cursor to beginning of line
-#         print('\nenter message: ', end='')
 
 def conn_read(peer_connection: object, peer_username: str) -> None:
     """handles and prints new incoming messages"""
