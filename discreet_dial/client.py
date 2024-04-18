@@ -134,6 +134,7 @@ def room_host_load(host_sock: object, room_id: str) -> None:
     print("\npeer connection successful, awaiting further info...")
     peer_username = conn.recv(1024).decode()
     print("peer connection success! please wait...")
+    chatroom(conn, peer_username)
 
 
 def conn_read(peer_connection: object, peer_username: str) -> None:
