@@ -4,7 +4,7 @@
 
 from requests import get, post, delete, exceptions
 from threading import Thread
-import socketio  # websocket
+import socketio  # polling
 import socket  # standard socket
 import util
 import tcp_hole_punch
@@ -100,15 +100,14 @@ def room_list_load(conf: list) -> None:
     if roomid_to_room['is_password_protected']:
         params['password'] = input('enter password: ')
 
-    room_connect = get(HOST + 'firetrial', params=params).json()
+    room_connect = get(HOST + 'firetrial', params=params)
     try:
         room_connect.raise_for_status()
     except exceptions.HTTPError:
         print('password was rejected (0 to exit)')
         if util.valid_usinp(0) == 0:
             return
-    except AttributeError:
-        join_room_load(room_connect, conf, roomid_to_room['username'])
+    join_room_load(room_connect.json(), conf, roomid_to_room['username'])
 
 
 def join_room_load(room_connect: dict, conf: list, peer_username: str) -> None:
@@ -117,6 +116,8 @@ def join_room_load(room_connect: dict, conf: list, peer_username: str) -> None:
     util.cli_draw_logo()
 
     print("sent host connection info...")
+    print(room_connect)
+    exit()
     peer_join_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         peer_join_sock.connect(("0.0.0.0", int(room_connect['host_port'])))
