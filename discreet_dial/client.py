@@ -116,8 +116,6 @@ def join_room_load(room_connect: dict, conf: list, peer_username: str) -> None:
     util.cli_draw_logo()
 
     print("sent host connection info...")
-    print(room_connect)
-    exit()
     peer_join_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         peer_join_sock.connect(("0.0.0.0", int(room_connect['host_port'])))

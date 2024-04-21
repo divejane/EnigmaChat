@@ -24,4 +24,4 @@ def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
 
 
 def h_punch(sock: object, peer_ip: str, peer_port: int):
-    working_socket = asyncio.run(punch_recv())
+    working_socket = asyncio.run(punch_recv(sock, peer_ip, peer_port))
