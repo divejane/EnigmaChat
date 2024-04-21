@@ -3,3 +3,4 @@ PyQt5-Qt5==5.15.12
 PyQt5-sip==12.13.0
 requests==2.31.0
 urllib3==1.26.6
+python-socketio==5.11.2
