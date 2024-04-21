@@ -50,7 +50,7 @@ def generate_room(conf) -> None:
                          'host_port': host_sock.getsockname()[1]}
 
             waitlist_sock = socketio.SimpleClient()
-            waitlist_sock.connect(HOST, transports=['websocket'])
+            waitlist_sock.connect(HOST)
             room_id = waitlist_sock.emit('addroom', host_info)
             print('\nattempting to connect to server...')
             break
@@ -135,7 +135,8 @@ def room_host_load(host_sock: object, room_id: str, waitlist_sock: object) -> No
     util.cli_draw_logo()
 
     print("\n\nroom configured, awaiting peer establishment...")
-    peer_ip = waitlist_sock.recieve()
+    peer_ip = waitlist_sock.receive()
+    print("received peer info, connecting...")
     conn = tcp_hole_punch.h_punch(
         host_sock, peer_ip, host_sock.getsockname()[1]+1)
     confirm_connect = delete(HOST + 'rooms', data={'room_id': room_id})
