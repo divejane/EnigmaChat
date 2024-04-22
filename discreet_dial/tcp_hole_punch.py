@@ -9,6 +9,7 @@ async def punch_send(peer_ip: str, peer_port: int) -> object:
         try:
             await hp_send_sock.connect((peer_ip, peer_port))
         except ConnectionRefusedError:
+            print('restarting connection...')
             continue
         return hp_send_sock
 
@@ -19,10 +20,11 @@ def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
         try:
             conn, addr = sock.accept()
         except socket.timeout:
+            print('restarting listener... ')
             continue
         return conn
     return punch_send_thr
 
 
 def h_punch(sock: object, peer_ip: str, peer_port: int):
-    working_socket = asyncio.run(punch_recv(sock, peer_ip, peer_port))
+    return asyncio.run(punch_recv(sock, peer_ip, peer_port))
