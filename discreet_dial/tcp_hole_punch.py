@@ -11,7 +11,7 @@ def punch_send(peer_ip: str, peer_port: int) -> object:
         try:
             hp_send_sock.connect((peer_ip, peer_port))
         except ConnectionRefusedError:
-            print('restarting connection...')
+            print('restarting sender...')
             continue
         stop.set()
         working_sock.append(hp_send_sock)
@@ -21,6 +21,7 @@ def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
     punch_send_thr = Thread(
         target=punch_send, args=(peer_ip, peer_port), daemon=True)
     punch_send_thr.start()
+    sock.settimeout(5)
     sock.listen()
     while not stop.is_set():
         try:
