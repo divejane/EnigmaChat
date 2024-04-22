@@ -1,30 +1,32 @@
 import socket
-import asyncio
+from threading import Thread, Event
+
+working_sock = []
+stop = Event()
 
 
-async def punch_send(peer_ip: str, peer_port: int) -> object:
+def punch_send(peer_ip: str, peer_port: int) -> object:
     hp_send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    while True:
-
+    while not stop.is_set():
         try:
-            await hp_send_sock.connect((peer_ip, peer_port))
+            hp_send_sock.connect((peer_ip, peer_port))
         except ConnectionRefusedError:
             print('restarting connection...')
             continue
-        return hp_send_sock
+        stop.set()
+        working_sock.append(hp_send_sock)
 
 
 def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
-    punch_send_thr = punch_send(peer_ip, peer_port)
-    while punch_send_thr is None:
+    punch_send_thr = Thread(
+        target=punch_send, args=(peer_ip, peer_port), daemon=True)
+    punch_send_thr.start()
+    while not stop.is_set:
         try:
             conn, addr = sock.accept()
         except socket.timeout:
-            print('restarting listener... ')
+            print('restarting listener...')
             continue
-        return conn
-    return punch_send_thr
-
-
-def h_punch(sock: object, peer_ip: str, peer_port: int):
-    return asyncio.run(punch_recv(sock, peer_ip, peer_port))
+        stop.set()
+        working_sock.append(conn)
+    return working_sock[0]
