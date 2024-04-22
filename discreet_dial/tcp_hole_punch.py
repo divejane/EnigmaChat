@@ -21,7 +21,7 @@ def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
     punch_send_thr = Thread(
         target=punch_send, args=(peer_ip, peer_port), daemon=True)
     punch_send_thr.start()
-    while not stop.is_set:
+    while not stop.is_set():
         try:
             conn, addr = sock.accept()
         except socket.timeout:
