@@ -121,6 +121,8 @@ def join_room_load(room_connect: dict, conf: list, peer_username: str) -> None:
         peer_join_sock.connect(("0.0.0.0", int(room_connect['host_port'])))
     except ConnectionRefusedError:
         peer_join_sock.bind(("0.0.0.0", room_connect['host_port']+1))
+        print(peer_join_sock,
+              room_connect['host_ip'], room_connect['host_port'])  # db
         peer_join_sock = tcp_hole_punch.punch_recv(
             peer_join_sock, room_connect['host_ip'], room_connect['host_port'])
     peer_join_sock.sendall(conf[0].encode())
@@ -136,6 +138,7 @@ def room_host_load(host_sock: object, room_id: str, waitlist_sock: object) -> No
     print("\n\nroom configured, awaiting peer establishment...")
     peer_ip = waitlist_sock.receive()
     print("received peer info, connecting...")
+    print(host_sock, peer_ip[1], host_sock.getsockname()[1]+1)  # db
     conn = tcp_hole_punch.punch_recv(
         host_sock, peer_ip[1], host_sock.getsockname()[1]+1)
     confirm_connect = delete(HOST + 'rooms', data={'room_id': room_id})
