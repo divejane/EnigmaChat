@@ -5,6 +5,7 @@ import asyncio
 async def punch_send(peer_ip: str, peer_port: int) -> object:
     hp_send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     while True:
+
         try:
             await hp_send_sock.connect((peer_ip, peer_port))
         except ConnectionRefusedError:
