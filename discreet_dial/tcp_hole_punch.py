@@ -10,7 +10,7 @@ def punch_send(peer_ip: str, peer_port: int) -> object:
     while not stop.is_set():
         try:
             hp_send_sock.connect((peer_ip, peer_port))
-        except ConnectionRefusedError:
+        except:
             print('restarting sender...')
             continue
         stop.set()
