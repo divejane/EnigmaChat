@@ -120,6 +120,7 @@ def join_room_load(room_connect: dict, conf: list, peer_username: str) -> None:
     try:
         peer_join_sock.connect(("0.0.0.0", int(room_connect['host_port'])))
     except ConnectionRefusedError:
+        peer_join_sock.detach()
         peer_join_sock.bind(("0.0.0.0", room_connect['host_port']+1))
         peer_join_sock = tcp_hole_punch.punch_recv(
             peer_join_sock, room_connect['host_ip'], room_connect['host_port'])
