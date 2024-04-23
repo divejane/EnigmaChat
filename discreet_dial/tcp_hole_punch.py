@@ -18,6 +18,7 @@ def punch_send(peer_ip: str, peer_port: int) -> object:
 
 
 def punch_recv(sock: object, peer_ip: str, peer_port: int) -> object:
+    print("started holepunch")
     punch_send_thr = Thread(
         target=punch_send, args=(peer_ip, peer_port), daemon=True)
     punch_send_thr.start()
