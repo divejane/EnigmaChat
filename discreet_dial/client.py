@@ -1,8 +1,8 @@
 # TODO: p2p encrypt & nat hole punch: these are the last things to do before 1.0 release
-# TODO: the serverside code for socketio is for the most part done, still need to do socketio client. Also need to actually do the threading/async
-# for the hole punch. Try to make it only return one socket when the whole operation is over.
+# TODO: actually get holepunch to work. I have literally no leads on why this does not work, b/c it runs differently depending on if it's being run
+# in AWS or off my machine.
 
-from requests import get, post, delete, exceptions
+from requests import get, delete, exceptions
 from threading import Thread
 import socketio  # polling
 import socket  # standard socket
@@ -51,7 +51,8 @@ def generate_room(conf) -> None:
 
             waitlist_sock = socketio.SimpleClient()
             waitlist_sock.connect(HOST)
-            room_id = waitlist_sock.emit('addroom', host_info)
+            waitlist_sock.emit('addroom', host_info)
+            room_id = waitlist_sock.receive()[1]
             print('\nattempting to connect to server...')
             break
         print("room name and/or password must be between 0 and 16 characters\n")
@@ -139,6 +140,7 @@ def room_host_load(host_sock: object, room_id: str, waitlist_sock: object) -> No
     print("received peer info, connecting...")
     conn = tcp_hole_punch.punch_recv(
         host_sock, peer_ip[1], host_sock.getsockname()[1]+1)
+    waitlist_sock.disconnect()
     confirm_connect = delete(HOST + 'rooms', data={'room_id': room_id})
     print("\npeer connection successful, awaiting further info...")
     peer_username = conn.recv(1024).decode()
