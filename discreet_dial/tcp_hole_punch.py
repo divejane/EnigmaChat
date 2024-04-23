@@ -15,6 +15,7 @@ def punch_send(peer_ip: str, peer_port: int) -> object:
         except:
             print('restarting sender...')
             continue
+        print('got here too')
         stop.set()
         working_sock.append(hp_send_sock)
 
