@@ -8,10 +8,11 @@ stop = Event()
 def punch_send(peer_ip: str, peer_port: int) -> object:
     hp_send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     hp_send_sock.bind(('0.0.0.0', peer_port))
+    print('got here')
     while not stop.is_set():
         try:
             hp_send_sock.connect((peer_ip, peer_port))
-        except ConnectionRefusedError:
+        except:
             print('restarting sender...')
             continue
         stop.set()
